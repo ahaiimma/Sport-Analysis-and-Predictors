@@ -1,6 +1,9 @@
+import matplotlib.pyplot as plt
+
 class Player:
-    def __init__(self, name):
-        self.name = name
+    def __init__(self):
+        self.name = input("Enter the player's name: ")
+        #self.number = input("Enter the player's number or ID: ")
         self.age = self.get_age()
         self.hand = self.select_player_hand()
         self.first_serve = self.firstServe()
@@ -13,6 +16,7 @@ class Player:
         self.ripw = self.ripW()
         self.ace = self.Ace()
         self.points = self.point()
+        self.experience_surface = input("Enter experience surface (e.g., 'Clay', 'Grass', etc.): ")
 
     @staticmethod
     def get_float(prompt):
@@ -94,7 +98,7 @@ class Player:
 
 
 
-    def ServeSpeed():
+    def ServeSpeed(self):
         """
         Collects between 3 and 5 serve speeds or success rates from user input
         and returns their average.
@@ -125,7 +129,7 @@ class Player:
 
         self.average = ServeSpeed()
 
-    def input_height_weight():
+    def input_height_weight(self):
         """
         Prompts the user to input height (in centimeters or meters) and weight.
         Height can be entered in centimeters or meters.
@@ -170,7 +174,7 @@ class Player:
         self.height, self.weight = input_height_weight()
 
 
-    def break_point_served():
+    def break_point_served(self):
         """
         Collects between 3 and 5 BPServed from user input
         and returns their average.
@@ -201,7 +205,7 @@ class Player:
 
         self.average = break_point_served()
 
-    def rally():
+    def rally(self):
         """
         Collects between 3 and 5 rallies from user input
         and returns their average.
@@ -232,7 +236,7 @@ class Player:
 
         self.average = rally()
 
-    def rip():
+    def rip(self):
         """
         Collects between 3 and 5 serve speeds or success rates from user input
         and returns their average.
@@ -260,7 +264,7 @@ class Player:
 
         self.average = rip()
 
-    def ripW():
+    def ripW(self):
         """
         Collects between 3 and 5 serve speeds or success rates from user input
         and returns their average.
@@ -288,7 +292,7 @@ class Player:
 
         self.average = ripW()
 
-    def Ace():
+    def Ace(self):
         """
         Collects between 3 and 5 ace rates from user input (as float values)
         and returns their average.
@@ -313,7 +317,7 @@ class Player:
     
         self.average = Ace()
 
-    def point(self):
+    def point(self, number):
         initial = float(input(f"Player {self.number} initial points: "))
         final = float(input(f"Player {self.number} final points: "))
         difference = final - initial
@@ -336,42 +340,195 @@ class Player:
                 print("Great! Your experience on this surface will be noted.")
                 return surface.capitalize()
             print("Invalid input. Please enter one of: Grass, Clay, Carpet, or Hard.")
-pass
 
 
-class Game:
-    def __init__(self):
-        name1 = input("Enter the name of Player 1: ")
-        name2 = input("Enter the name of Player 2: ")
-        self.player1 = Player(name1)
-        self.player2 = Player(name2)
-        pass
+player1 = Player()
+player2 = Player()
 
+class PlayerEvaluator:  
+    def __init__(self, player1, player2):  
+        self.p1 = player1  
+        self.p2 = player2  
 
-        
-    
-    def analyze_players(self):
-        # Nested logic based on your description
-        if self.player1.get_age < self.player2.get_age:
-            print(f"{self.player1.name} is younger than {self.player2.name}.")
-            
-            # Check dominant hand
-            if self.player1.hand in ["Right", "Left"]:
-                print(f"{self.player1.name} uses their {self.player1.hand} hand.")
-                
-                # Check serve speed difference
-                speed_diff = self.player1.serve_speed - self.player2.serve_speed
-                print(f"Serve speed difference: {speed_diff}")
-                
-                # Check if this difference exceeds any value in the list
-                compare_values = [3, 4, 5, 6, 7, 8, 9, 10]
-                if any(speed_diff >= val for val in compare_values):
-                    print("Serve speed difference exceeds at least one of the threshold values.")
-                else:
-                    print("Serve speed difference does not exceed the threshold values.")
+        self.p1_points = 0
+        self.p2_points = 0
+
+    def evaluate(self):  
+        experience_levels = ['Clay', 'Grass', 'Carpet', 'Hard']  
+        p1_exp = getattr(self.p1, 'experience_surface', None)  
+        p2_exp = getattr(self.p2, 'experience_surface', None)  
+
+        p1_has_exp = p1_exp in experience_levels  
+        p2_has_exp = p2_exp in experience_levels  
+
+        # The nested decision logic:  
+        if p1_has_exp and not p2_has_exp:  
+            print(f"{self.p1.name} has surface experience advantage.")  
+            advantage = self.p1  
+            self.p1_points += 2
+        else:  
+            if p2_has_exp and not p1_has_exp:  
+                print(f"{self.p2.name} has surface experience advantage.")  
+                advantage = self.p2  
+                self.p2_points += 2
+            else:  
+                # Both have or both lack experience, move to next condition  
+                if self.p1.hand == 'Right' and self.p2.hand == 'Left':  
+                    print(f"{self.p1.name} has hand advantage.")  
+                    advantage = self.p1  
+                    self.p1_points += 1
+                elif self.p2.hand == 'Right' and self.p1.hand == 'Left':  
+                    print(f"{self.p2.name} has hand advantage.")  
+                    advantage = self.p2  
+                    self.p2_points += 1
+                else:  
+                    # Younger age comparison  
+                    if self.p1.age < self.p2.age:  
+                        print(f"{self.p1.name} is younger; advantage.")  
+                        advantage = self.p1  
+                        self.p1_points += 1
+                    elif self.p2.age < self.p1.age:  
+                        print(f"{self.p2.name} is younger; advantage.")  
+                        advantage = self.p2  
+                        self.p2_points += 1
+                    else:  
+                        # 20s check  
+                        p1_in_20s = 20 <= self.p1.age < 30  
+                        p2_in_20s = 20 <= self.p2.age < 30  
+                        if p1_in_20s and not p2_in_20s:  
+                            print(f"{self.p1.name} in 20s; advantage.")  
+                            advantage = self.p1  
+                            self.p1_points += 1
+                        elif p2_in_20s and not p1_in_20s:  
+                            print(f"{self.p2.name} in 20s; advantage.")  
+                            advantage = self.p2
+                            self.p2_points += 1  
+                        else:  
+                            # First serve  
+                            if self.p1.first_serve > self.p2.first_serve:  
+                                print(f"{self.p1.name} has better first serve.")  
+                                advantage = self.p1
+                                self.p1_points += 1  
+                            elif self.p2.first_serve > self.p1.first_serve:  
+                                print(f"{self.p2.name} has better first serve.")  
+                                advantage = self.p2
+                                self.p2_points += 1  
+                            else:  
+                                # Second serve  
+                                if self.p1.second_serve > self.p2.second_serve:  
+                                    print(f"{self.p1.name} has better second serve.")  
+                                    advantage = self.p1
+                                    self.p1_points += 1  
+                                elif self.p2.second_serve > self.p1.second_serve:  
+                                    print(f"{self.p2.name} has better second serve.")  
+                                    advantage = self.p2
+                                    self.p2_points += 1  
+                                else:  
+                                    # Serve speed  
+                                    if self.p1.serve_speed > self.p2.serve_speed:  
+                                        print(f"{self.p1.name} has better serve speed.")  
+                                        advantage = self.p1
+                                        self.p1_points += 2  
+                                    elif self.p2.serve_speed > self.p1.serve_speed:  
+                                        print(f"{self.p2.name} has better serve speed.")  
+                                        advantage = self.p2
+                                        self.p2_points += 2  
+                                    else:  
+                                        # Rally stats  
+                                        if self.p1.rally_stats > self.p2.rally_stats:  
+                                            print(f"{self.p1.name} better rally stats.")  
+                                            advantage = self.p1
+                                            self.p1_points += 1  
+                                        elif self.p2.rally_stats > self.p1.rally_stats:  
+                                            print(f"{self.p2.name} better rally stats.")  
+                                            advantage = self.p2
+                                            self.p2_points += 1  
+                                        else:  
+                                            # Rip  
+                                            if self.p1.rip > self.p2.rip:  
+                                                print(f"{self.p1.name} better rip.")  
+                                                advantage = self.p1
+                                                self.p1_points += 1  
+                                            elif self.p2.rip > self.p1.rip:
+                                                print(f"{self.p2.name} better rip.")
+                                                advantage = self.p2
+                                                self.p2_points += 1
+                                            else: 
+                                                if self.p1.ripw > self.p2.ripw:
+                                                    print(f"{self.p1.name} better ripw.")
+                                                    advantage = self.p1
+                                                    self.p1_points += 1
+                                                elif self.p2.ripw > self.p1.ripw:
+                                                    print(f"{self.p2.name} better ripw.")
+                                                    advantage = self.p2
+                                                    self.p2_points += 1
+                                                else:
+                                                     # 10. Points
+                                                    if self.p1.points > self.p2.points:
+                                                        print(f"{self.p1.name} is in better form based on points.")
+                                                        advantage = self.p1
+                                                    elif self.p2.points > self.p1.points:
+                                                        print(f"{self.p2.name} is in better form based on points.")
+                                                        advantage = self.p2
+                                                        self.p2_points += 1
+                                                    else:
+                                                        # 11. Final consideration: ace, serve speed, experience
+                                                        if self.p1.ace > self.p2.ace and self.p1.serve_speed > self.p2.serve_speed:
+                                                            print(f"{self.p1.name} wins by ace and serve speed.")
+                                                            advantage = self.p1
+                                                            self.p1_points += 1
+                                                        elif self.p2.ace > self.p1.ace and self.p2.serve_speed > self.p1.serve_speed:
+                                                            print(f"{self.p2.name} wins by ace and serve speed.")
+                                                            advantage = self.p2
+                                                            self.p2_points += 1
+        print(f"{self.p1.name} points: {self.p1_points}")
+        print(f"{self.p2.name} points: {self.p2_points}")
+        if advantage:
+            print(f"Final advantage: {advantage.name}")
         else:
-            print(f"{self.player2.name} is older or equal in age to {self.player1.name}.")
+            print("Players are evenly matched.")     
 
-# Usage example:
-# Create players with all necessary attributes properly initialized
-# Then create a game instance and call analyze_players()
+
+    def compare_stats(self):
+        print("\n=== MATCH COMPARISON ===")
+        print(f"{'Stat':<20} | Player 1 | Player 2")
+        print(f"{'Age':<20} | {self.player1.age:7} | {self.player2.age}")
+        print(f"{'Dominant Hand':<20} | {self.player1.hand:7} | {self.player2.hand}")
+        print(f"{'First Serve Avg':<20} | {self.player1.first_serve:7.1f} | {self.player2.first_serve:.1f}")
+        print(f"{'Total Score':<20} | {self.player1.total_score():7.1f} | {self.player2.total_score():.1f}")
+                           
+    def determine_winner(self):
+        p1_score = self.player1.total_score()
+        p2_score = self.player2.total_score()
+        # Plot table for the result
+        fig, ax = plt.subplots(figsize=(6, 2))
+        ax.axis('off')
+        result_text = []
+        result_text.append(["Player 1 Total", f"{p1_score:.1f}"])
+        result_text.append(["Player 2 Total", f"{p2_score:.1f}"])
+        if p1_score > p2_score:
+            result_text.append(["\nResult:", "Player 1 Wins!"])
+        elif p2_score > p1_score:
+            result_text.append(["\nResult:", "Player 2 Wins!"])
+        else:
+            result_text.append(["\nResult:", "It's a Tie!"])
+
+        result_table = ax.table(cellText=result_text,
+                                colWidths=[0.4, 0.6],
+                                cellLoc='center',
+                                loc='center')
+        result_table.auto_set_font_size(False)
+        result_table.set_fontsize(14)
+        result_table.scale(1, 2)
+        plt.title("Match Result", pad=20)
+        plt.show()
+
+    def run_match(self):
+        self.player1.display_stats()
+        self.player2.display_stats()
+        self.compare_stats()
+        self.determine_winner()
+
+    if __name__ == "__main__":
+        match = Game()
+        match.run_match()
